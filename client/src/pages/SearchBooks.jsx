@@ -7,9 +7,11 @@ import {
   Card,
   Row
 } from 'react-bootstrap';
+import { useQuery, useMutation } from '@apollo/client';
+import { QUERY_SAVE_BOOK } from '../utils/queries';
 
 import Auth from '../utils/auth';
-import { saveBook, searchGoogleBooks } from '../utils/API';
+// import { saveBook, searchGoogleBooks } from '../utils/API';
 import { saveBookIds, getSavedBookIds } from '../utils/localStorage';
 
 const SearchBooks = () => {
@@ -21,11 +23,16 @@ const SearchBooks = () => {
   // create state to hold saved bookId values
   const [savedBookIds, setSavedBookIds] = useState(getSavedBookIds());
 
+  // save book
+  const [saveBook, { error }] = useMutation(QUERY_SAVE_BOOK);
+
+
   // set up useEffect hook to save `savedBookIds` list to localStorage on component unmount
   // learn more here: https://reactjs.org/docs/hooks-effect.html#effects-with-cleanup
   useEffect(() => {
     return () => saveBookIds(savedBookIds);
   });
+}
 
   // create method to search for books and set state on form submit
   const handleFormSubmit = async (event) => {
@@ -70,20 +77,19 @@ const SearchBooks = () => {
     if (!token) {
       return false;
     }
-
     try {
-      const response = await saveBook(bookToSave, token);
-
-      if (!response.ok) {
-        throw new Error('something went wrong!');
-      }
-
-      // if book successfully saves to user's account, save book id to state
-      setSavedBookIds([...savedBookIds, bookToSave.bookId]);
+      const { loading, data } = useQuery(QUERY_SAVE_BOOK, {
+        variables: { bookId: bookId },
+      })
     } catch (err) {
-      console.error(err);
+    console.error(err);
+  }
+    const book = data?.book || {};
+
+
+    if (loading) {
+      return <div>Loading...</div>;
     }
-  };
 
   return (
     <>
