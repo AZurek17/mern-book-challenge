@@ -11,7 +11,7 @@ const LoginForm = () => {
   const [userFormData, setUserFormData] = useState({ email: '', password: '' });
   const [validated] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
-  const { loginUser } = useMutation(LOGIN_USER);
+  const [ loginUser ] = useMutation(LOGIN_USER);
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -34,9 +34,9 @@ const LoginForm = () => {
       });
 
 
-      if (!data.ok) {
-        throw new Error('something went wrong!');
-      }
+      // if (!data.ok) {
+      //   throw new Error('something went wrong!');
+      // }
 
       const { token, user } = await data.json();
       console.log(user);

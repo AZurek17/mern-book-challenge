@@ -8,7 +8,8 @@ import {
   Row
 } from 'react-bootstrap';
 import { useQuery, useMutation } from '@apollo/client';
-import { QUERY_ADD_BOOK } from '../utils/queries';
+// import { QUERY_ADD_BOOK } from '../utils/queries';
+import { ADD_BOOK } from '../utils/mutations';
 import { QUERY_ME } from '../utils/queries';
 
 import Auth from '../utils/auth';
@@ -25,7 +26,7 @@ const SearchBooks = () => {
   const [savedBookIds, setSavedBookIds] = useState(getSavedBookIds());
 
   // save book
-  const [saveBook] = useMutation(QUERY_ADD_BOOK);
+  const [saveBook] = useMutation(ADD_BOOK);
 
 
   // set up useEffect hook to save `savedBookIds` list to localStorage on component unmount

@@ -27,10 +27,17 @@ export const ADD_USER = gql`
 export const ADD_BOOK = gql`
   mutation addBook($bookText: String!) {
     addBook(bookText: $bookText) {
-      _id
-      bookText
-      bookAuthor
-      createdAt
+      username  
+      email
+      bookCount
+      savedBooks {
+        bookId
+        authors
+        description
+        title
+        image
+        link
+      }
     }
   }
 `;
@@ -38,10 +45,17 @@ export const ADD_BOOK = gql`
 export const REMOVE_BOOK = gql`
   mutation removeBook($bookId: ID!) {
     removeBook(bookId: $bookId) {
-      _id
-      bookText
-      bookAuthor
-      createdAt
+      username
+      email
+      bookCount
+      savedBooks {
+        bookId
+        authors
+        description
+        title
+        image
+        link
+      }
     }
   }
 `;
