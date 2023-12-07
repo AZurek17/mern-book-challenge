@@ -2,28 +2,76 @@ const { User, Book } = require('../models');
 
 const resolvers = {
   Query: {
-    user: async () => {
-      return User.find({});
-    },
-    book: async (parent, { _id }) => {
-      const params = _id ? { _id } : {};
-      return Book.find(params);
-    },
+  me: async (parent, args, context) => {
+    if (context.user) {
+      return User.findOne({ _id: context.user._id }).populate('thoughts');
+    }
+    throw AuthenticationError;
   },
+},
   Mutation: {
-    createMatchup: async (parent, args) => {
-      const matchup = await Matchup.create(args);
-      return matchup;
-    },
-    createVote: async (parent, { _id, techNum }) => {
-      const vote = await Matchup.findOneAndUpdate(
-        { _id },
-        { $inc: { [`tech${techNum}_votes`]: 1 } },
-        { new: true }
-      );
-      return vote;
-    },
+  
+  addUser: async (parent, { username, email, password }) => {
+    const user = await User.create({ username, email, password });
+    const token = signToken(user);
+    return { token, user };
   },
+
+  login: async (parent, { email, password }) => {
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      throw AuthenticationError;
+    }
+
+    const correctPw = await user.isCorrectPassword(password);
+
+    if (!correctPw) {
+      throw AuthenticationError;
+    }
+
+    const token = signToken(user);
+
+    return { token, user };
+  },
+
+  addBook: async (parent, { bookText }, context) => {
+    if (context.user) {
+      const book = await Book.create({
+        bookText,
+        bookAuthor: context.user.username,
+      });
+
+      await Book.findOneAndUpdate(
+        { _id: context.user._id },
+        { $addToSet: { books: book._id } }
+      );
+
+      return book;
+    }
+    throw AuthenticationError;
+    ('You need to be logged in!');
+  },
+  
+  removeBook: async (parent, { bookId }, context) => {
+    if (context.user) {
+      const book = await Book.findOneAndDelete({
+        _id: bookId,
+        bookAuthor: context.user.username,
+      });
+
+      await User.findOneAndUpdate(
+        { _id: context.user._id },
+        { $pull: { books: book._id } }
+      );
+
+      return book;
+    }
+    throw AuthenticationError;
+  },
+ 
+},
+
 };
 
 module.exports = resolvers;
