@@ -8,10 +8,11 @@ import {
   Row
 } from 'react-bootstrap';
 import { useQuery, useMutation } from '@apollo/client';
-import { QUERY_SAVE_BOOK } from '../utils/queries';
+import { QUERY_ADD_BOOK } from '../utils/queries';
+import { QUERY_ME } from '../utils/queries';
 
 import Auth from '../utils/auth';
-// import { saveBook, searchGoogleBooks } from '../utils/API';
+import { saveBook, searchGoogleBooks } from '../utils/API';
 import { saveBookIds, getSavedBookIds } from '../utils/localStorage';
 
 const SearchBooks = () => {
@@ -24,7 +25,7 @@ const SearchBooks = () => {
   const [savedBookIds, setSavedBookIds] = useState(getSavedBookIds());
 
   // save book
-  const [saveBook, { error }] = useMutation(QUERY_SAVE_BOOK);
+  const [saveBook] = useMutation(QUERY_ADD_BOOK);
 
 
   // set up useEffect hook to save `savedBookIds` list to localStorage on component unmount
@@ -32,7 +33,7 @@ const SearchBooks = () => {
   useEffect(() => {
     return () => saveBookIds(savedBookIds);
   });
-}
+
 
   // create method to search for books and set state on form submit
   const handleFormSubmit = async (event) => {
@@ -78,18 +79,25 @@ const SearchBooks = () => {
       return false;
     }
     try {
-      const { loading, data } = useQuery(QUERY_SAVE_BOOK, {
-        variables: { bookId: bookId },
-      })
-    } catch (err) {
-    console.error(err);
-  }
-    const book = data?.book || {};
+    await saveBook({
+      variables: { ...bookToSave },
+      update: (cache) => {
+        const data = cache.readQuery({ query: QUERY_ME });
+        const userDataCache = data.me;
+        const savedBooksCache = userDataCache.savedBooks;
+        const updatedCache = [...savedBooksCache, bookToSave];
+        data.me.savedBooks = updatedCache;
+        cache.writeQuery({
+          query: QUERY_ME,
+          data: { me: { ...userDataCache, savedBooks: updatedCache } } })
+        },
+      });
 
-
-    if (loading) {
-      return <div>Loading...</div>;
-    }
+        setSavedBookIds([...savedBookIds, bookToSave.bookId]);
+      } catch (err) {
+        console.error(err);
+      }
+    };
 
   return (
     <>
@@ -155,6 +163,7 @@ const SearchBooks = () => {
       </Container>
     </>
   );
-};
+}
+
 
 export default SearchBooks;
