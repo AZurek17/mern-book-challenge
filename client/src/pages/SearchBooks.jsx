@@ -84,6 +84,7 @@ const SearchBooks = () => {
         const savedBooksCache = userDataCache.savedBooks;
         const updatedCache = [...savedBooksCache, bookToSave];
         data.me.savedBooks = updatedCache;
+        
         cache.writeQuery({
           query: QUERY_ME,
           data: { me: { ...userDataCache, savedBooks: updatedCache } } })
