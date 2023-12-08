@@ -7,13 +7,12 @@ import {
   Card,
   Row
 } from 'react-bootstrap';
-import { useQuery, useMutation } from '@apollo/client';
-// import { QUERY_ADD_BOOK } from '../utils/queries';
-import { ADD_BOOK } from '../utils/mutations';
+import { useMutation } from '@apollo/client';
+import { SAVE_BOOK } from '../utils/mutations';
 import { QUERY_ME } from '../utils/queries';
 
 import Auth from '../utils/auth';
-import { saveBook, searchGoogleBooks } from '../utils/API';
+import { searchGoogleBooks } from '../utils/API';
 import { saveBookIds, getSavedBookIds } from '../utils/localStorage';
 
 const SearchBooks = () => {
@@ -21,13 +20,10 @@ const SearchBooks = () => {
   const [searchedBooks, setSearchedBooks] = useState([]);
   // create state for holding our search field data
   const [searchInput, setSearchInput] = useState('');
-
   // create state to hold saved bookId values
   const [savedBookIds, setSavedBookIds] = useState(getSavedBookIds());
-
   // save book
-  const [saveBook] = useMutation(ADD_BOOK);
-
+  const [saveBook] = useMutation(SAVE_BOOK);
 
   // set up useEffect hook to save `savedBookIds` list to localStorage on component unmount
   // learn more here: https://reactjs.org/docs/hooks-effect.html#effects-with-cleanup
